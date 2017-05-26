@@ -3,6 +3,9 @@ script: asdf plugin-test postgis https://github.com/smashedtoatoms/asdf-postgres
 before_script:
   - git clone https://github.com/asdf-vm/asdf.git
   - . asdf/asdf.sh
+  - asdf install
+  - initdb db
+  - pg_ctl -D db
 os:
   - linux
   - osx

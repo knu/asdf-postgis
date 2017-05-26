@@ -124,7 +124,7 @@ get_download_file_path() {
 get_download_url() {
   local install_type=$1
   local version=$2
-  echo "https://ftp.postgis.org/pub/source/v${version}/postgis-${version}.tar.gz"
+  echo "http://download.osgeo.org/postgis/source/postgis-${version}.tar.gz"
 }
 
 
