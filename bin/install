@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-install_postgres() {
+install_postgis() {
   local install_type=$1
   local version=$2
   local install_path=$3
@@ -40,14 +40,14 @@ install_postgres() {
 
 
 construct_configure_options() {
-  if [ "$POSTGRES_CONFIGURE_OPTIONS" = "" ]; then
+  if [ "$POSTGIS_CONFIGURE_OPTIONS" = "" ]; then
     local configure_options="$(os_based_configure_options) --prefix=$install_path"
 
-    if [ "$POSTGRES_EXTRA_CONFIGURE_OPTIONS" != "" ]; then
-      configure_options="$configure_options $POSTGRES_EXTRA_CONFIGURE_OPTIONS"
+    if [ "$POSTGIS_EXTRA_CONFIGURE_OPTIONS" != "" ]; then
+      configure_options="$configure_options $POSTGIS_EXTRA_CONFIGURE_OPTIONS"
     fi
   else
-    local configure_options="$POSTGRES_CONFIGURE_OPTIONS --prefix=$install_path"
+    local configure_options="$POSTGIS_CONFIGURE_OPTIONS --prefix=$install_path"
   fi
 
   echo "$configure_options"
@@ -82,7 +82,7 @@ os_based_configure_options() {
   else
     configure_options=""
   fi
-  
+
   echo $configure_options
 }
 
@@ -94,9 +94,9 @@ untar_path() {
 
   if [ "$install_type" = "version" ]
   then
-    echo "$tmp_download_dir/postgresql-${version}"
+    echo "$tmp_download_dir/postgis-${version}"
   else
-    echo "$tmp_download_dir/postgresql-${version}"
+    echo "$tmp_download_dir/postgis-${version}"
   fi
 }
 
@@ -115,7 +115,7 @@ get_download_file_path() {
   local install_type=$1
   local version=$2
   local tmp_download_dir=$3
-  local pkg_name="postgresql-${version}.tar.gz"
+  local pkg_name="postgis-${version}.tar.gz"
 
   echo "$tmp_download_dir/$pkg_name"
 }
@@ -124,8 +124,8 @@ get_download_file_path() {
 get_download_url() {
   local install_type=$1
   local version=$2
-  echo "https://ftp.postgresql.org/pub/source/v${version}/postgresql-${version}.tar.gz"
+  echo "https://ftp.postgis.org/pub/source/v${version}/postgis-${version}.tar.gz"
 }
 
 
-install_postgres $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_postgis $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
