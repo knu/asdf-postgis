@@ -12,13 +12,20 @@ install_postgis() {
   fi
 
   local source_path=$(get_download_file_path $install_type $version $tmp_download_dir)
-  download_source $install_type $version $source_path
+  download_source $install_type $version $source_path || exit 1
+
+  # use the locally selected version of postgres for building postgis, if any
+  ASDF_POSTGRES_VERSION=$(asdf current postgres 2>/dev/null | awk '{print $2}')
+  if [ -n "$ASDF_POSTGRES_VERSION" ]; then
+    export ASDF_POSTGRES_VERSION
+  fi
 
   # running this in a subshell
   # because we don't want to disturb current working dir
   (
+    set -e
     cd $(dirname $source_path)
-    tar zxf $source_path || exit 1
+    tar zxf $source_path
     cd $(untar_path $install_type $version $tmp_download_dir)
 
     local configure_options="$(construct_configure_options)"
@@ -27,14 +34,10 @@ install_postgis() {
     unset ASDF_PKG_MISSING
 
     echo "Building with options: $configure_options"
-    ./configure $configure_options || exit 1
-    make || exit 1
-    make install || exit 1
-    cd contrib || exit 1
-    make || exit 1
-    make install || exit 1
-    mkdir $install_path/data || exit 1
-    $install_path/bin/initdb -D $install_path/data || exit 1
+    ./configure $configure_options
+    make
+    make install
+    echo PostGIS $version has been installed.
   )
 }
 
