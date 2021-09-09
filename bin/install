@@ -35,7 +35,7 @@ install_postgis() {
 
     echo "Building with options: $configure_options"
     ./configure $configure_options
-    make
+    make -j4
     make install
     echo PostGIS $version has been installed.
   )
