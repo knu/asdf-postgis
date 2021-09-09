@@ -82,6 +82,8 @@ os_based_configure_options() {
 
   if [[ "$operating_system" =~ "Darwin" ]]; then
     exit_if_homebrew_not_installed
+    local prefix=$(brew --prefix)
+    configure_options="--with-gettext=$prefix CPPFLAGS=-I$prefix/include LDFLAGS=-L$prefix/lib"
   else
     configure_options=""
   fi
