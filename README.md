@@ -19,7 +19,7 @@ Finally, you will need a working installation of PostgreSQL. See [asdf-postgres]
 ## Install
 
 ```
-asdf plugin-add postgis https://github.com/francois/asdf-postgis.git
+asdf plugin-add postgis https://github.com/knu/asdf-postgis.git
 ```
 
 ## ASDF options
