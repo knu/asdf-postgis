@@ -9,21 +9,37 @@ According to PostGIS installation page, you will need GEOS, Proj, GDAL, LibXML2 
 Finally, you will need a working installation of PostgreSQL. See [asdf-postgres](https://github.com/smashedtoatoms/asdf-postgres) for the asdf plugin.
 
 1. You will need a compiler.
-  * macOS
-    1. ```gcc```
-    1. Hit the ok button and it will install.  If it already has it, then you are good.
-  * Ubuntu
-    1. ```sudo apt-get install linux-headers-$(uname -r) build-essential```
-1. On Ubuntu, you will need libreadline
-  1. ```sudo apt-get install libreadline-dev```
+
+    * macOS
+
+      1. `gcc`
+      2. Hit the ok button and it will install.  If it already has it, then you are good.
+
+    * Ubuntu
+
+      ```sh
+      sudo apt-get install linux-headers-$(uname -r) build-essential
+      ```
+
+2. On Ubuntu, you will need libreadline
+
+    ```sh
+    sudo apt-get install libreadline-dev
+    ```
+
 1. On macOS, you will need these dependencies installed.
-  1. ```brew install geos proj gdal libxml2 json-c```
 
-## Install
+    ```sh
+    brew install geos proj gdal libxml2 json-c
+    ```
 
-```
+## Installation
+
+```sh
 asdf plugin-add postgis https://github.com/francois/asdf-postgis.git
 ```
+
+For [mise](https://mise.jdx.dev/), this plugin is listed in the official registry and you don't need to manually install it.  Just run `mise install postgis 3.2`, which will work.
 
 ## ASDF options
 
