@@ -1,41 +1,34 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 install_postgis() {
   local install_type=$1
   local version=$2
   local install_path=$3
 
-  if [ "$TMPDIR" = "" ]; then
-    local tmp_download_dir=$(mktemp -d)
-  else
-    local tmp_download_dir=$TMPDIR
+  local manager="$(ps co command= -p $(ps o ppid= -p $$))" postgres_version
+  if [ "$manager" = "mise" ]; then
+    postgres_version=$(mise current postgres 2>/dev/null)
+  else # asdf ("bash")
+    postgres_version=$(asdf current postgres 2>/dev/null | awk '{print $2}')
   fi
 
-  local source_path=$(get_download_file_path $install_type $version $tmp_download_dir)
-  download_source $install_type $version $source_path || exit 1
-
-  # use the locally selected version of postgres for building postgis, if any
-  ASDF_POSTGRES_VERSION=$(asdf current postgres 2>/dev/null | awk '{print $2}')
-  if [ -n "$ASDF_POSTGRES_VERSION" ]; then
-    export ASDF_POSTGRES_VERSION
-  fi
-
-  # running this in a subshell
-  # because we don't want to disturb current working dir
   (
-    set -e
-    cd $(dirname $source_path)
-    tar zxf $source_path
-    cd $(untar_path $install_type $version $tmp_download_dir)
+    set -euo pipefail
+
+    cd "$ASDF_DOWNLOAD_PATH"
+
+    echo "postgres $postgres_version" >> .tool-versions
+    if [ "$manager" = "mise" ]; then
+      eval "$(mise env)"
+    fi
 
     local configure_options="$(construct_configure_options)"
-    # set in os_based_configure_options
-    # we unset it here because echo-ing changes the return value of the function
-    unset ASDF_PKG_MISSING
 
     echo "Building with options: $configure_options"
     ./configure $configure_options
-    make -j4
+    make -j${ASDF_CONCURRENCY-}
     make install
     echo PostGIS $version has been installed.
   )
@@ -43,94 +36,49 @@ install_postgis() {
 
 
 construct_configure_options() {
-  if [ "$POSTGIS_CONFIGURE_OPTIONS" = "" ]; then
-    local configure_options="$(os_based_configure_options) --prefix=$install_path"
+  local configure_options="--prefix=$install_path"
 
-    if [ "$POSTGIS_EXTRA_CONFIGURE_OPTIONS" != "" ]; then
-      configure_options="$configure_options $POSTGIS_EXTRA_CONFIGURE_OPTIONS"
-    fi
+  if [ -n "${POSTGIS_CONFIGURE_OPTIONS-}" ]; then
+    configure_options="$POSTGIS_CONFIGURE_OPTIONS $configure_options"
   else
-    local configure_options="$POSTGIS_CONFIGURE_OPTIONS --prefix=$install_path"
+    configure_options="$(os_based_configure_options) $configure_options${POSTGIS_EXTRA_CONFIGURE_OPTIONS:+ $POSTGIS_EXTRA_CONFIGURE_OPTIONS}"
   fi
 
   echo "$configure_options"
 }
 
 
-homebrew_package_path() {
-  local package_name=$1
-
-  if [ "$(brew ls --versions $package_name)" = "" ]; then
-    echo ""
-  else
-    echo "$(brew --prefix $package_name)"
-  fi
-}
-
-
 exit_if_homebrew_not_installed() {
   if [ "$(brew --version 2>/dev/null)" = "" ]; then
-    echo "ERROR: Please install homebrew for OSX"
+    echo "ERROR: Please install Homebrew" >&2
     exit 1
   fi
 }
 
 
 os_based_configure_options() {
-  local operating_system=$(uname -a)
   local configure_options=""
 
-  if [[ "$operating_system" =~ "Darwin" ]]; then
-    exit_if_homebrew_not_installed
-    local prefix=$(brew --prefix)
-    configure_options="--with-gettext=$prefix CPPFLAGS=-I$prefix/include LDFLAGS=-L$prefix/lib"
-  else
-    configure_options=""
-  fi
+  case "$(uname -s)" in
+    Darwin)
+      exit_if_homebrew_not_installed
+      local prefix="$(brew --prefix)"
+      configure_options="--with-gettext=$prefix CPPFLAGS=-I$prefix/include LDFLAGS=-L$prefix/lib"
+
+      local required_packages="libxml2 json-c proj gdal geos" package
+
+      for package in $(comm -13 <(brew list --formula | sort) <(echo "$required_packages" | xargs -n1 | sort)); do
+        echo "WARNING: $package is not installed via Homebrew, which may be necessary." >&2
+      done
+
+      if prefix=$(brew --prefix libxml2 2>/dev/null); then
+        configure_options="$configure_options --with-xml2config=$prefix/bin/xml2-config"
+      fi
+      ;;
+  esac
 
   echo $configure_options
 }
 
 
-untar_path() {
-  local install_type=$1
-  local version=$2
-  local tmp_download_dir=$3
-
-  if [ "$install_type" = "version" ]
-  then
-    echo "$tmp_download_dir/postgis-${version}"
-  else
-    echo "$tmp_download_dir/postgis-${version}"
-  fi
-}
-
-
-download_source() {
-  local install_type=$1
-  local version=$2
-  local download_path=$3
-  local download_url=$(get_download_url $install_type $version)
-
-  curl -Lo $download_path -C - $download_url
-}
-
-
-get_download_file_path() {
-  local install_type=$1
-  local version=$2
-  local tmp_download_dir=$3
-  local pkg_name="postgis-${version}.tar.gz"
-
-  echo "$tmp_download_dir/$pkg_name"
-}
-
-
-get_download_url() {
-  local install_type=$1
-  local version=$2
-  echo "http://download.osgeo.org/postgis/source/postgis-${version}.tar.gz"
-}
-
-
-install_postgis $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_postgis "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
