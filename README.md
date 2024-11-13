@@ -5,8 +5,8 @@ PostGIS plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 ## Dependencies
 
 This requires [brew](http://brew.sh) if you're on macOS, or a Debian flavored Linux.  If you need it to work on something else, you'll likely need to modify the plugin.
-According to PostGIS installation page, you will need GEOS, Proj, GDAL, LibXML2 and JSON-C.
-Finally, you will need a working installation of PostgreSQL. See [asdf-postgres](https://github.com/smashedtoatoms/asdf-postgres) for the asdf plugin.
+According to PostGIS installation page, you will need GEOS, Proj, GDAL, SFGCGAL, LibXML2, JSON-C, protobuf-c, etc.
+Finally, you will need a working installation of PostgreSQL including server headers. See [asdf-postgres](https://github.com/smashedtoatoms/asdf-postgres) for the asdf plugin.
 
 1. You will need a compiler.
 
@@ -15,28 +15,32 @@ Finally, you will need a working installation of PostgreSQL. See [asdf-postgres]
       1. `gcc`
       2. Hit the ok button and it will install.  If it already has it, then you are good.
 
-    * Ubuntu
+    * Ubuntu/Debian Linux
 
       ```sh
       sudo apt-get install linux-headers-$(uname -r) build-essential
       ```
 
-2. On Ubuntu, you will need libreadline
+2. You will need these depencies installed.
 
-    ```sh
-    sudo apt-get install libreadline-dev
-    ```
+    * macOS
 
-1. On macOS, you will need these dependencies installed.
+      ```sh
+      brew install geos proj gdal sfcgal libxml2 json-c protobuf-c
+      ```
 
-    ```sh
-    brew install geos proj gdal libxml2 json-c
-    ```
+    * Ubuntu/Debian Linux
+
+      ```sh
+      sudo apt install gettext libproj-dev libgdal-dev libsfcgal-dev libgeos-dev \
+        libxml2-dev libxml2-utils docbook-xsl-ns xsltproc libjson-c-dev \
+        libprotobuf-c-dev protobuf-c-compiler
+      ```
 
 ## Installation
 
 ```sh
-asdf plugin-add postgis https://github.com/francois/asdf-postgis.git
+asdf plugin-add postgis https://github.com/knu/asdf-postgis.git
 ```
 
 For [mise](https://mise.jdx.dev/), this plugin is listed in the official registry and you don't need to manually install it.  Just run `mise install postgis 3.2`, which will work.
