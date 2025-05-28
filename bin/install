@@ -11,7 +11,7 @@ install_postgis() {
   if [ "$manager" = "mise" ]; then
     postgres_version=$(mise current postgres 2>/dev/null)
   else # asdf ("bash")
-    postgres_version=$(asdf current postgres 2>/dev/null | awk '{print $2}')
+    postgres_version=$(asdf current postgres 2>/dev/null | tail -n 1 | awk '{print $2}')
   fi
 
   (
