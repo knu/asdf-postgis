@@ -21,7 +21,7 @@ install_postgis() {
 
     echo "postgres $postgres_version" >> .tool-versions
     if [ "$manager" = "mise" ]; then
-      eval "$(mise env)"
+      eval "$(mise env -s bash)"
     fi
 
     local configure_options="$(construct_configure_options)"
