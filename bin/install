@@ -30,6 +30,8 @@ install_postgis() {
     ./configure $configure_options
     make -j${ASDF_CONCURRENCY-}
     make install
+    mkdir -p "$install_path"
+    printf '%s\n' "$postgres_version" > "$install_path/postgres-version"
     echo PostGIS $version has been installed.
   )
 }
