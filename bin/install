@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+plugin_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+
 install_postgis() {
   local install_type=$1
   local version=$2
@@ -25,6 +27,8 @@ install_postgis() {
     fi
 
     local configure_options="$(construct_configure_options)"
+
+    bash "$plugin_dir/lib/patch-gdal-min.bash" "$ASDF_DOWNLOAD_PATH"
 
     echo "Building with options: $configure_options"
     ./configure $configure_options

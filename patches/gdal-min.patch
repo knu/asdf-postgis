@@ -1,0 +1,8 @@
+--- a/raster/rt_pg/rtpg_geometry.c
++++ b/raster/rt_pg/rtpg_geometry.c
+@@ -1,3 +1,2 @@
+-	/* MIN macro is from GDAL's cpl_port.h */
+-	num_bands = MIN(pixtypes_len, values_len);
+-	num_bands = MIN(num_bands, nodatavals_len);
++	num_bands = Min(pixtypes_len, values_len);
++	num_bands = Min(num_bands, nodatavals_len);
